@@ -1,3 +1,6 @@
 {
-    "git.ignoreLimitWarning": true
+    "git.ignoreLimitWarning": true,
+    "simple.readme.settings.github": "livingston12",
+    "simple.readme.settings.name": "Livingston Lyttle Reynoso",
+    "simple.readme.settings.lang": "en"
 }
