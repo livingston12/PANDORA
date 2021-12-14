@@ -16,6 +16,7 @@ namespace Pandora.Core.Migrations
         public DbSet<CategoryEntity> Categories { get; set; }
         public DbSet<InvoicesEntity> Invoices { get; set; }
         public DbSet<ClientsEntity> Clients { get; set; }
+        public DbSet<IngredientEntity> Ingredients { get; set; }
 
         public PandoraDbContext(DbContextOptions<PandoraDbContext> options)
             : base(options)

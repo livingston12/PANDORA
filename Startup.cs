@@ -65,6 +65,7 @@ namespace Pandora
             services.AddTransient<IFileManager, FileManager>();
             services.AddTransient<IImageService, ImageService>();
             services.AddTransient<IClientService, ClientService>();
+            services.AddTransient<IIngredientService, IngredientService>();
 
         }
 

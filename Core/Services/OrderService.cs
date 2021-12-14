@@ -12,6 +12,7 @@ using Pandora.Core.Models.Dtos;
 using Pandora.Core.Models.Entities;
 using Pandora.Core.Models.Requests;
 using Pandora.Core.Models.Responses;
+using Pandora.Core.Models.Results;
 using Pandora.Core.Utils;
 using Pandora.Core.ViewModels;
 
@@ -35,7 +36,6 @@ namespace Pandora.Services
 
         public async Task<Result<OrderResult>> CreateAsync(OrderCreateRequest request)
         {
-            Check.NotNull(request, nameof(request));
 
             Result<OrderResult> result = new Result<OrderResult>();
             try

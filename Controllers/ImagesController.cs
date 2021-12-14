@@ -1,15 +1,11 @@
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Primitives;
 using Pandora.Core.Attributes;
 using Pandora.Core.Interfaces;
-using Pandora.Core.Models.Requests;
-using Pandora.Core.Models.Responses;
 using Pandora.Core.ViewModels;
 using Pandora.Managers;
 using System.Threading.Tasks;
-using static Pandora.Managers.FileUpload;
 
 namespace Pandora.Controllers
 {
