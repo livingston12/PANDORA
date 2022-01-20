@@ -76,7 +76,7 @@ namespace Pandora.Services
                     Price = GetPriceOfItem(x.DishId)
                 });
                 result = await ChekOrderDetail(ordersDetail, request);
-                
+
 
                 if (!result.Data.Errors.Any())
                 {
@@ -250,7 +250,7 @@ namespace Pandora.Services
                 };
                 await dbContext.Invoices.AddAsync(invoiceEntity).ConfigureAwait(false);
             }
-            else 
+            else
             {
                 throw new Exception("La orden no existe");
             }
@@ -278,7 +278,8 @@ namespace Pandora.Services
             {
                 errors.Add("Los metodos de pagos dispoibles son <b>Efectivo</b> o <b>Tarjeta</b>");
             }
-            if(errors.Any()) {
+            if (errors.Any())
+            {
                 result.Data.Errors.Add("1", errors);
             }
 
@@ -365,7 +366,7 @@ namespace Pandora.Services
                     SubTotal = m.Subtotal,
                     Total = m.Total,
                     RestaurantId = m.RestaurantId,
-                    Details = m.Details.Select(x => new OrdersDetailViewModel() 
+                    Details = m.Details.Select(x => new OrdersDetailViewModel()
                     {
                         OrderDetailId = x.OrderDetailId,
                         DishId = x.DishId,

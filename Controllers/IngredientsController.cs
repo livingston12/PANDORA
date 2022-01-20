@@ -29,7 +29,7 @@ namespace Pandora.Controllers
             this.IngredientService = IngredientService;
         }
 
-         [HttpGet]
+        [HttpGet]
         //[JwtAuthorize("Hydra.Accounts.Read")]
         [ProducesResponseType(typeof(Response<IngredientViewModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -40,7 +40,7 @@ namespace Pandora.Controllers
         {
             return await IngredientService.GetAsync(request).ConfigureAwait(false);
         }
-         [HttpGet("summary/{restaurantId}")]
+        [HttpGet("summary/{restaurantId}")]
         //[JwtAuthorize("Hydra.Accounts.Read")]
         [ProducesResponseType(typeof(IEnumerable<IngredientViewModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -51,7 +51,7 @@ namespace Pandora.Controllers
         {
             return await IngredientService.GetSummaryAsync(restaurantId).ConfigureAwait(false);
         }
-         [HttpPost]
+        [HttpPost]
         //[JwtAuthorize("Hydra.Accounts.Read")]
         [ProducesResponseType(typeof(Result<IngredientResult>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -63,7 +63,7 @@ namespace Pandora.Controllers
             var result = await IngredientService.CreateAsync(request).ConfigureAwait(false);
             return Ok(result);
         }
-        
+
         [HttpPut()]
         //[JwtAuthorize("Hydra.Accounts.Read")]
         [ProducesResponseType(typeof(UpdateResult), StatusCodes.Status200OK)]

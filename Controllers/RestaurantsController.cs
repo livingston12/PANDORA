@@ -1,7 +1,6 @@
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Primitives;
 using Pandora.Core.Attributes;
 using Pandora.Core.Interfaces;
 using Pandora.Core.Models.Requests;
@@ -18,11 +17,11 @@ namespace Pandora.Controllers
     public class RestaurantsController : ControllerBase
     {
         private readonly IRestaurantService RestaurantService;
-        
+
         public RestaurantsController(
             IRestaurantService RestaurantService)
         {
-            this.RestaurantService = RestaurantService;            
+            this.RestaurantService = RestaurantService;
         }
 
         [HttpGet]
@@ -37,7 +36,7 @@ namespace Pandora.Controllers
             return await RestaurantService.GetAsync(request).ConfigureAwait(false);
         }
 
-        
-        
+
+
     }
 }

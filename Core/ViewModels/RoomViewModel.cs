@@ -8,7 +8,7 @@ namespace Pandora.Core.ViewModels
         public int RoomId { get; set; }
         public string Room { get; set; }
         public string Description { get; set; }
-        public IEnumerable<TablesEntity> Tables {get;set;}
-        
+        public IEnumerable<TablesEntity> Tables { get; set; }
+
     }
 }

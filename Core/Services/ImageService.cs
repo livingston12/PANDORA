@@ -1,8 +1,6 @@
 using System;
 using System.Threading.Tasks;
 using Pandora.Core.Interfaces;
-using Pandora.Core.Models.Responses;
-using Microsoft.Extensions.Configuration;
 using IO = System.IO;
 using Pandora.Managers;
 using Microsoft.AspNetCore.Hosting;
@@ -39,16 +37,18 @@ namespace Pandora.Services
                 string directoryImage = IO.Path.Combine(UrlBase, directory);
                 string urlImage = GetURLFile(directoryImage, name);
 
-                if(!string.IsNullOrEmpty(urlImage)) {
+                if (!string.IsNullOrEmpty(urlImage))
+                {
                     IO.File.SetAttributes(urlImage, IO.FileAttributes.Normal);
                 }
-                
+
                 if (IO.File.Exists(urlImage))
                 {
                     result.file = await IO.File.ReadAllBytesAsync(urlImage);
                     result.extention = IO.Path.GetExtension(urlImage);
                 }
-                else {
+                else
+                {
                     urlImage = GetURLFile(UrlBase, "notImage");
                     result.file = await IO.File.ReadAllBytesAsync(urlImage);
                     result.extention = IO.Path.GetExtension(urlImage);
@@ -71,7 +71,8 @@ namespace Pandora.Services
                                           .Select(x => x.Split("\\"))
                                           .Where(x => x.LastOrDefault().Split(".")[0] == fileName)
                                           .FirstOrDefault();
-            if (directoryFiles != null) {
+            if (directoryFiles != null)
+            {
                 urlImage = IO.Path.Combine(directoryFiles);
             }
 

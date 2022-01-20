@@ -44,12 +44,12 @@ namespace Pandora.Core.Migrations
             modelBuilder.Entity<DishesDetailEntity>()
                 .HasOne(a => a.Dish)
                 .WithMany(c => c.Ingredients)
-                .HasForeignKey(c => c.DishId);           
+                .HasForeignKey(c => c.DishId);
 
             modelBuilder.Entity<TablesEntity>()
                 .HasOne(a => a.Room)
                 .WithMany(c => c.Tables)
-                .HasForeignKey(c => c.RoomId);                
+                .HasForeignKey(c => c.RoomId);
         }
     }
 }

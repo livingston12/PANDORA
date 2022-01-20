@@ -1,7 +1,6 @@
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Primitives;
 using Pandora.Core.Attributes;
 using Pandora.Core.Interfaces;
 using Pandora.Core.Models.Requests;
@@ -18,11 +17,11 @@ namespace Pandora.Controllers
     public class TablesController : ControllerBase
     {
         private readonly ITableService TableService;
-        
+
         public TablesController(
             ITableService TableService)
         {
-            this.TableService = TableService;            
+            this.TableService = TableService;
         }
 
         [HttpGet]
@@ -50,7 +49,7 @@ namespace Pandora.Controllers
             return Ok(isReserved);
         }
 
-        
-        
+
+
     }
 }

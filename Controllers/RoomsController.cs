@@ -1,7 +1,6 @@
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Primitives;
 using Pandora.Core.Attributes;
 using Pandora.Core.Interfaces;
 using Pandora.Core.Models.Requests;
@@ -18,11 +17,11 @@ namespace Pandora.Controllers
     public class RoomsController : ControllerBase
     {
         private readonly IRoomService RoomService;
-        
+
         public RoomsController(
             IRoomService RoomService)
         {
-            this.RoomService = RoomService;            
+            this.RoomService = RoomService;
         }
 
         [HttpGet]
@@ -47,7 +46,7 @@ namespace Pandora.Controllers
         {
             return await RoomService.GetTablesAsync(roomId).ConfigureAwait(false);
         }
-        
-        
+
+
     }
 }

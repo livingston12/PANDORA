@@ -178,7 +178,7 @@ namespace Pandora.Services
                 var tran = await dbContext.Database.BeginTransactionAsync();
                 try
                 {
-                    
+
                     DishesEntity dish = DishRequestToEntity(request);
                     dbContext.Add(dish);
                     await dbContext.SaveChangesAsync();
@@ -203,17 +203,17 @@ namespace Pandora.Services
             }
 
             return result;
-        }       
+        }
 
         private async Task<List<string>> validateDish(DishViewModelCreate request)
         {
             List<string> errors = new List<string>();
             bool categoryExists = await dbContext.Categories.Where(m => m.CategoryId == request.CategoryId).AnyAsync();
-            
+
             if (request.Dish.Length == 0)
             {
                 errors.Add("El <b>plato</b> es obligatorio");
-            }           
+            }
             if (request.Price <= 0)
             {
                 errors.Add("El <b>precio</b> tiene que ser mayor que cero");
@@ -222,16 +222,17 @@ namespace Pandora.Services
             {
                 errors.Add("La <b>categoria</b> no existe");
             }
-            if (!request.Ingredients.Any()) 
+            if (!request.Ingredients.Any())
             {
                 errors.Add("Los <b>ingredientes</b> son obligatorios");
             }
-            else {
-              var errorDetail =  await validateDishDetail(request.Ingredients);
-              if (errorDetail.Any())
-              {
-                errors.AddRange(errorDetail);
-              }
+            else
+            {
+                var errorDetail = await validateDishDetail(request.Ingredients);
+                if (errorDetail.Any())
+                {
+                    errors.AddRange(errorDetail);
+                }
             }
 
             return errors;
@@ -480,7 +481,7 @@ namespace Pandora.Services
 
                 if (dishDetails.Any())
                 {
-                    dbContext.RemoveRange(dishDetails);                    
+                    dbContext.RemoveRange(dishDetails);
                 }
 
                 dbContext.Remove(dish);
@@ -529,12 +530,12 @@ namespace Pandora.Services
             var result = new Result<DishDetailResult>();
             result = await CreateDetail(request);
             return result;
-           
+
         }
 
         private async Task<Result<DishDetailResult>> CreateDetail(DishDetailViewModelCreate request)
         {
-             Result<DishDetailResult> result = new Result<DishDetailResult>();
+            Result<DishDetailResult> result = new Result<DishDetailResult>();
             try
             {
                 result = await SaveDetailAsync(request).ConfigureAwait(false);
@@ -550,12 +551,12 @@ namespace Pandora.Services
                 result.Message = new StringBuilder("No se puede crear un plato en blanco.").ToString();
             }
 
-            return result;            
+            return result;
         }
 
         private async Task<Result<DishDetailResult>> SaveDetailAsync(DishDetailViewModelCreate request)
         {
-             Result<DishDetailResult> result = new Result<DishDetailResult>();
+            Result<DishDetailResult> result = new Result<DishDetailResult>();
             result.Data = new DishDetailResult(new Dictionary<string, IEnumerable<string>>());
             result.Data.Detail = new DishesDetailEntity();
 
@@ -576,15 +577,15 @@ namespace Pandora.Services
             }
 
             return result;
-            
-        }       
+
+        }
 
         private async Task<DishesDetailEntity> DishDetailExists(DishDetailViewModelCreate request)
         {
             return await dbContext.DishDetails.Where(m => m.DishId == request.DishId && m.IngredientId == request.IngredientId).FirstOrDefaultAsync();
         }
 
-         private async Task<(DishDetailResult dataResult, string statusCode, string message)> SaveDetailAsync(DishDetailViewModelCreate request, DishDetailResult data)
+        private async Task<(DishDetailResult dataResult, string statusCode, string message)> SaveDetailAsync(DishDetailViewModelCreate request, DishDetailResult data)
         {
             (DishDetailResult dataResult, string statusCode, string message) result = (data, "", "");
             List<string> errors = await validateDetailAsync(request);
@@ -598,7 +599,7 @@ namespace Pandora.Services
                 var tran = await dbContext.Database.BeginTransactionAsync();
                 try
                 {
-                    DishesDetailEntity dishDetail = new DishesDetailEntity() 
+                    DishesDetailEntity dishDetail = new DishesDetailEntity()
                     {
                         DishId = request.DishId,
                         IngredientId = request.IngredientId,
@@ -622,30 +623,30 @@ namespace Pandora.Services
 
             }
 
-            return result;           
-        }    
+            return result;
+        }
 
         private async Task<List<string>> validateDetailAsync(DishDetailViewModelCreate request)
         {
             List<string> errors = new List<string>();
-            
+
             var isDuplicated = await dbContext.DishDetails.Where(m => m.DishId == request.DishId && m.IngredientId == request.IngredientId).AnyAsync();
             var dishExists = await dbContext.Dishes.Where(m => m.DishId == request.DishId).AnyAsync();
-            var  ingredientExits = await dbContext.Ingredients.Where(m => m.IngredientId == request.IngredientId).AnyAsync();
-             
+            var ingredientExits = await dbContext.Ingredients.Where(m => m.IngredientId == request.IngredientId).AnyAsync();
+
             if (isDuplicated)
             {
                 errors.Add("El <b>Ingrediente</b> ya existe asociado para este <b>plato</b>");
             }
-            if (!dishExists) 
+            if (!dishExists)
             {
                 errors.Add("Este <b>plato</b> no existe");
-            } 
+            }
             if (!ingredientExits)
             {
-               errors.Add("Este <b>ingrediente</b> no existe");
+                errors.Add("Este <b>ingrediente</b> no existe");
             }
-            if (request.QuantityRequired <= 0) 
+            if (request.QuantityRequired <= 0)
             {
                 errors.Add("La <b>Cantidad requerida</b> tiene que ser <b>mayor</b> que <b>cero</b>");
             }

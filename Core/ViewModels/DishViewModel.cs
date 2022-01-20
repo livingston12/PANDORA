@@ -41,7 +41,7 @@ namespace Pandora.Core.ViewModels
         public int QuantityRequired { get; set; }
     }
 
-     public class DishDetailViewModelCreate
+    public class DishDetailViewModelCreate
     {
         public int DishId { get; set; }
         public int IngredientId { get; set; }

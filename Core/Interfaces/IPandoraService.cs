@@ -1,5 +1,3 @@
-
-
 using Pandora.Core.Migrations;
 
 namespace Pandora.Core.Interfaces

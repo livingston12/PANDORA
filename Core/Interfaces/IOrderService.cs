@@ -11,6 +11,5 @@ namespace Pandora.Core.Interfaces
     {
         Task<Response<OrderViewModel>> GetAsync(OrderRequest filter);
         Task<Result<OrderResult>> CreateRangeAsync(OrderCreateRequest request);
-        
     }
 }

@@ -1,7 +1,6 @@
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Primitives;
 using Pandora.Core.Attributes;
 using Pandora.Core.Interfaces;
 using Pandora.Core.Models.Requests;
@@ -18,7 +17,7 @@ namespace Pandora.Controllers
     public class MenusController : ControllerBase
     {
         private readonly IMenuService MenuService;
-        
+
         public MenusController(
             IMenuService MenuService
             )
@@ -61,7 +60,7 @@ namespace Pandora.Controllers
         {
             return await MenuService.GetDishes(categoryId);
         }
-        
-        
+
+
     }
 }
