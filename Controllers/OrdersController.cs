@@ -1,7 +1,6 @@
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Primitives;
 using Pandora.Core.Attributes;
 using Pandora.Core.Interfaces;
 using Pandora.Core.Models;
@@ -21,11 +20,11 @@ namespace Pandora.Controllers
     public class OrdersController : ControllerBase
     {
         private readonly IOrderService OrderService;
-        
+
         public OrdersController(
             IOrderService OrderService)
         {
-            this.OrderService = OrderService;            
+            this.OrderService = OrderService;
         }
 
         [HttpGet]
@@ -40,7 +39,7 @@ namespace Pandora.Controllers
             return await OrderService.GetAsync(request).ConfigureAwait(false);
         }
 
-         [HttpPost]
+        [HttpPost]
         //[JwtAuthorize("Hydra.Accounts.Read")]
         [ProducesResponseType(typeof(Result<OrderResult>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -53,7 +52,7 @@ namespace Pandora.Controllers
             return Ok(results);
         }
 
-        
-        
+
+
     }
 }

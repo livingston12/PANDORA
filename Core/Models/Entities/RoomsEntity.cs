@@ -1,5 +1,4 @@
 using Pandora.Core.Attributes;
-using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -15,7 +14,7 @@ namespace Pandora.Core.Models.Entities
         [Required]
         public string Room { get; set; }
         public string Description { get; set; }
-        public IEnumerable<TablesEntity> Tables {get;set;}
+        public IEnumerable<TablesEntity> Tables { get; set; }
     }
 
 }

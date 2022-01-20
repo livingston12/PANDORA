@@ -8,6 +8,8 @@ using Pandora.Core.Models.Requests;
 using Pandora.Core.Models.Responses;
 using Pandora.Core.Models.Results;
 using Pandora.Core.ViewModels;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 
 namespace Pandora.Controllers
@@ -27,7 +29,7 @@ namespace Pandora.Controllers
             this.IngredientService = IngredientService;
         }
 
-         [HttpGet]
+        [HttpGet]
         //[JwtAuthorize("Hydra.Accounts.Read")]
         [ProducesResponseType(typeof(Response<IngredientViewModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -38,17 +40,41 @@ namespace Pandora.Controllers
         {
             return await IngredientService.GetAsync(request).ConfigureAwait(false);
         }
-         [HttpPost]
+        [HttpGet("summary/{restaurantId}")]
+        //[JwtAuthorize("Hydra.Accounts.Read")]
+        [ProducesResponseType(typeof(IEnumerable<IngredientViewModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IEnumerable<IngredientViewModel>> GetSummaryAsync([FromRoute] int restaurantId)
+        {
+            return await IngredientService.GetSummaryAsync(restaurantId).ConfigureAwait(false);
+        }
+        [HttpPost]
         //[JwtAuthorize("Hydra.Accounts.Read")]
         [ProducesResponseType(typeof(Result<IngredientResult>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> CreateAsync([FromQuery] IngredientViewModel request)
+        public async Task<IActionResult> CreateAsync([FromBody] IngredientViewModel request)
         {
             var result = await IngredientService.CreateAsync(request).ConfigureAwait(false);
             return Ok(result);
         }
+
+        [HttpPut()]
+        //[JwtAuthorize("Hydra.Accounts.Read")]
+        [ProducesResponseType(typeof(UpdateResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<UpdateResult> PutAsync([FromBody, Required] IngredientViewModel ingredient)
+        {
+            return await IngredientService.PutAsync(ingredient).ConfigureAwait(false);
+        }
+
     }
 }

@@ -17,11 +17,11 @@ namespace Pandora.Controllers
     public class ClientsController : ControllerBase
     {
         private readonly IClientService ClientService;
-        
+
         public ClientsController(
             IClientService ClientService)
         {
-            this.ClientService = ClientService;            
+            this.ClientService = ClientService;
         }
 
         [HttpGet]

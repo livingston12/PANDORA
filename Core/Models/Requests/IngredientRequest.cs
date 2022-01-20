@@ -1,4 +1,3 @@
-using System;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Pandora.Core.Models.Requests
@@ -11,6 +10,6 @@ namespace Pandora.Core.Models.Requests
         public decimal? Price { get; set; }
         public decimal? Quantity { get; set; }
         public int? RestaurantId { get; set; }
-        
+
     }
 }

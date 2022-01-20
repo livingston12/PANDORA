@@ -1,5 +1,4 @@
 using Pandora.Core.Attributes;
-using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -21,7 +20,7 @@ namespace Pandora.Core.Models.Entities
         public bool? IsReserved { get; set; }
         [ForeignKey(nameof(RoomId))]
         public RoomsEntity Room { get; set; }
-        
+
     }
 
 }

@@ -48,14 +48,16 @@ namespace Pandora.Services
             return result;
         }
 
-        private IQueryable<IngredientEntity> GetQuery(IngredientRequest filter)
+        private IQueryable<IngredientEntity> GetQuery(IngredientRequest filter, bool isApplyFilter = true)
         {
             var query = dbContext
                             .Ingredients
                             .AsQueryable();
-
-            query = ApplyFilters(query, filter);
-            query = query.OrderBy(filter.Sort);
+            if (isApplyFilter)
+            {
+                query = ApplyFilters(query, filter);
+                query = query.OrderBy(filter.Sort);
+            }
 
             return query;
         }
@@ -88,6 +90,31 @@ namespace Pandora.Services
                     Quantity = m.Quantity,
                     RestaurantId = m.RestaurantId
                 });
+        }
+
+        public async Task<IEnumerable<IngredientViewModel>> GetSummaryAsync(int restaurantId)
+        {
+            Check.NotNull(restaurantId, nameof(restaurantId));
+
+            IEnumerable<IngredientViewModel> result = null;
+            var query = dbContext.Ingredients
+                            .Where(m => m.RestaurantId == restaurantId);
+            var total = await query.CountAsync().ConfigureAwait(false);
+
+            if (total > 0)
+            {
+                result = query
+                    .Select(m => new IngredientViewModel()
+                    {
+                        Ingredient = m.Ingredient,
+                        IngredientId = m.IngredientId,
+                        Price = m.Price,
+                        Quantity = m.Quantity,
+                        RestaurantId = m.RestaurantId
+                    });
+            }
+
+            return result;
         }
 
         public async Task<Result<IngredientResult>> CreateAsync(IngredientViewModel request)
@@ -156,7 +183,7 @@ namespace Pandora.Services
         }
         private async Task<(IngredientResult dataResult, string statusCode, string message)> SaveAsync(IngredientViewModel request, IngredientResult ingredientResult)
         {
-            (IngredientResult dataResult, string statusCode,string message) result = (ingredientResult, "", "");
+            (IngredientResult dataResult, string statusCode, string message) result = (ingredientResult, "", "");
             List<string> errors = await validateIngredient(request);
             if (errors.Any())
             {
@@ -186,18 +213,6 @@ namespace Pandora.Services
             return result;
         }
 
-        private static IngredientEntity IngredientRequestToEntity(IngredientViewModel request)
-        {
-            IngredientEntity result = new IngredientEntity()
-            {
-                Ingredient = request.Ingredient,
-                Price = request.Price,
-                Quantity = request.Quantity,
-                RestaurantId = request.RestaurantId
-            };
-            return result;
-        }
-
         public async Task<List<string>> validateIngredient(IngredientViewModel request)
         {
             List<string> errors = new List<string>();
@@ -222,6 +237,105 @@ namespace Pandora.Services
 
             return errors;
         }
+
+        private static IngredientEntity IngredientRequestToEntity(IngredientViewModel request)
+        {
+            IngredientEntity result = new IngredientEntity()
+            {
+                Ingredient = request.Ingredient,
+                Price = request.Price,
+                Quantity = request.Quantity,
+                RestaurantId = request.RestaurantId
+            };
+            return result;
+        }
+
+        public async Task<UpdateResult> PutAsync(IngredientViewModel request)
+        {
+            Check.NotNull(request, nameof(request));
+
+            UpdateResult result = await PutAsync(request.IngredientId, request);
+            return result;
+        }
+
+        private async Task<UpdateResult> PutAsync(int ingredientId, IngredientViewModel request)
+        {
+            UpdateResult result = new UpdateResult(new Dictionary<string, IEnumerable<string>>());
+            (string Index, List<string> errors) listErrors = await ValidateRequest(request);
+            var ingredient = await dbContext.Ingredients
+                .Where(x => x.IngredientId == ingredientId)
+                .FirstOrDefaultAsync()
+                .ConfigureAwait(false);
+
+            if (ingredient == null)
+            {
+                listErrors.errors.Add("El ingrediente no existe");
+            }
+            else if (!request.Quantity.HasValue)
+            {
+                listErrors.errors.Add("La <b>existencia</b> del ingrediente es obligatoria");
+            }
+            else if (request.Quantity.Value <= 0)
+            {
+                listErrors.errors.Add("La <b>existencia</b> debe ser <b>mayor</b> que <b>cero</b>");
+            }
+
+            if (listErrors.errors.Any())
+            {
+                result.Errors.Add(listErrors.Index, listErrors.errors);
+                result.StatusCode = "400";
+            }
+            else
+            {
+                try
+                {
+                    ingredient.Ingredient = request.Ingredient;
+                    ingredient.Price = request.Price;
+                    ingredient.Quantity = request.Quantity;
+
+                    dbContext.Entry(ingredient).State = EntityState.Modified;
+                    await dbContext.SaveChangesAsync();
+                }
+                catch (System.Exception ex)
+                {
+                    listErrors.errors = new List<string>();
+                    listErrors.errors.Add($"Error inesperado: ${ex.Message}");
+                    result.Errors.Add(listErrors.Index, listErrors.errors);
+                    result.StatusCode = "400";
+                }
+            }
+            return result;
+        }
+
+        private async Task<(string Index, List<string> errors)> ValidateRequest(IngredientViewModel request)
+        {
+            (string Index, List<string> errors) results = ("1", new List<string>());
+            List<string> errors = new List<string>();
+            var restaurant = await dbContext.Ingredients
+                .Where(x =>
+                    x.RestaurantId == request.RestaurantId &&
+                    x.IngredientId == request.IngredientId
+                )
+                .FirstOrDefaultAsync()
+                .ConfigureAwait(false);
+
+            if (request.Price < 0)
+            {
+                errors.Add("El precio no puede ser menor que cero");
+            }
+            if (request.Quantity <= 0)
+            {
+                errors.Add("La cantidad tiene que ser mayor que cero");
+            }
+            if (restaurant == null)
+            {
+                errors.Add("Este ingrediente no pertenece a este restaurante");
+            }
+
+            results.errors = errors;
+            return results;
+        }
+
 
     }
 }

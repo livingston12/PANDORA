@@ -1,4 +1,3 @@
-using System;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Pandora.Core.Models.Requests
@@ -11,6 +10,6 @@ namespace Pandora.Core.Models.Requests
         public bool? Active { get; set; }
         [NotMapped]
         public string RoomId { get; set; }
-        
+
     }
 }

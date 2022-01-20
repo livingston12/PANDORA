@@ -17,7 +17,7 @@ namespace Pandora.Controllers
     public class CategoriesController : ControllerBase
     {
         private readonly ICategoriesService CategoryService;
-        
+
         public CategoriesController(
             ICategoriesService CategoryService
             )
@@ -36,6 +36,6 @@ namespace Pandora.Controllers
         {
             return await CategoryService.GetAsync(request).ConfigureAwait(false);
         }
-        
+
     }
 }

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Pandora.Core.Models.Results
 {
-public class ResultError
+    public class ResultError
     {
         public ResultError(IDictionary<string, IEnumerable<string>> errors)
         {

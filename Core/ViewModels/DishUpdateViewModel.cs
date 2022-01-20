@@ -1,15 +1,16 @@
 using System;
-using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Pandora.Core.Models.Requests
+namespace Pandora.Core.ViewModels
 {
-    public class DishRequest : GetRequest
+    public class DishUpdateViewModel
     {
-        [NotMapped]
-        public string DishIds { get; set; }
+        public int DishId { get; set; }
         public string Dish { get; set; }
         public string Description { get; set; }
+        public decimal Price { get; set; }
+        public int Quantity { get; set; }
         public DateTime? ExpirationDate { get; set; }
         public int? CategoryId { get; set; }
+
     }
 }

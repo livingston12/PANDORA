@@ -19,8 +19,9 @@ namespace Pandora.Core.Models.Entities
         public decimal Price { get; set; }
         public int Quantity { get; set; }
         public DateTime? ExpirationDate { get; set; }
-        public byte? Image { get; set; }
         public int? CategoryId { get; set; }
+        [ForeignKey(nameof(CategoryId))]
+        public CategoryEntity Category { get; set; }
         public IEnumerable<DishesDetailEntity> Ingredients { get; set; }
 
     }

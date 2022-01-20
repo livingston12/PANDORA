@@ -10,6 +10,6 @@ namespace Pandora.Core.Models.Requests
         public string Menu { get; set; }
         public DateTime? ExpirationDate { get; set; }
         public int RestaurantId { get; set; }
-        
+
     }
 }

@@ -1,4 +1,3 @@
-using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Pandora.Core.Attributes;
@@ -14,7 +13,5 @@ namespace Pandora.Core.Models.Entities
         [Required]
         public string Category { get; set; }
         public int MenuId { get; set; }
-
-
     }
 }
