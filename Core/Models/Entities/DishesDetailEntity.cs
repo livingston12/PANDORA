@@ -13,9 +13,12 @@ namespace Pandora.Core.Models.Entities
         [Required]
         public int DishId { get; set; }
         [Required]
+        public int Quantity { get; set; }
+        [Required]
         public int IngredientId { get; set; }
         [ForeignKey(nameof(DishId))]
         public DishesEntity Dish { get; set; }
-
+        [ForeignKey(nameof(IngredientId))]
+        public IngredientEntity Ingredient { get; set; }
     }
 }

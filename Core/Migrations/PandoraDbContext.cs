@@ -17,6 +17,7 @@ namespace Pandora.Core.Migrations
         public DbSet<InvoicesEntity> Invoices { get; set; }
         public DbSet<ClientsEntity> Clients { get; set; }
         public DbSet<IngredientEntity> Ingredients { get; set; }
+        public DbSet<DishesDetailEntity> DishDetails { get; set; }
 
         public PandoraDbContext(DbContextOptions<PandoraDbContext> options)
             : base(options)
@@ -43,12 +44,12 @@ namespace Pandora.Core.Migrations
             modelBuilder.Entity<DishesDetailEntity>()
                 .HasOne(a => a.Dish)
                 .WithMany(c => c.Ingredients)
-                .HasForeignKey(c => c.DishId);
+                .HasForeignKey(c => c.DishId);           
 
             modelBuilder.Entity<TablesEntity>()
                 .HasOne(a => a.Room)
                 .WithMany(c => c.Tables)
-                .HasForeignKey(c => c.RoomId);
+                .HasForeignKey(c => c.RoomId);                
         }
     }
 }

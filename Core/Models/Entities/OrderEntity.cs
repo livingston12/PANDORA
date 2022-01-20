@@ -19,8 +19,10 @@ namespace Pandora.Core.Models.Entities
         [Required]
         public int ItemsQuantity { get; set; }
         public decimal? Discount { get; set; }
+        [NotMapped]
         public decimal? Subtotal { get; set; }    
         public decimal? Tax { get; set; }
+        [NotMapped]
         public decimal? Total { get; set; }  
         public string Note { get; set; }
         public int? RestaurantId { get; set; }

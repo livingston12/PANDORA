@@ -156,7 +156,6 @@ namespace Pandora.Services
                      Dish = m.Dish,
                      DishId = m.DishId,
                      ExpirationDate = m.ExpirationDate,
-                     Image = m.Image,
                      Price = m.Price,
                      Quantity = m.Quantity
                  });
