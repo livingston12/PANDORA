@@ -376,6 +376,143 @@ namespace Pandora.Services
                     })
                 });
         }
+
+        public async Task<OrderTotalViewModel> GetTotalByTablesAsync(OrderTotalRequest request)
+        {
+            List<(decimal? total, string label)> lisTotals = new List<(decimal? total, string label)>();
+
+            OrderTotalViewModel result = new OrderTotalViewModel();
+            var orders = await dbContext.Orders.Where(m => m.RestaurantId == request.RestaurantId).ToListAsync();
+            orders = checkDateFilters(orders, request.DateFrom, request.DateTo);
+
+            if (orders.Any())
+            {
+                foreach (var order in orders)
+                {
+                    var invoce = await dbContext.Invoices.Where(m => m.OrderId == order.OrderId).FirstOrDefaultAsync();
+                    if (invoce == null)
+                    {
+                        continue;
+                    }
+
+                    string TableName = await GetCurrentTableName(invoce.TableId);
+                    if (!string.IsNullOrEmpty(TableName))
+                    {
+                        lisTotals.Add((order.Total, TableName));
+                    }
+                }
+            }
+
+            if (lisTotals.Any())
+            {
+                result = TotalToOrderTotalViewModel(lisTotals);
+
+            }
+
+            return result;
+        }
+
+        private static OrderTotalViewModel TotalToOrderTotalViewModel(List<(decimal? total, string label)> lisTotals)
+        {
+            return new OrderTotalViewModel()
+            {
+                Labels = lisTotals
+                                .GroupBy(m => m.label)
+                                .Select(m => m.Key)
+                                .ToList(),
+                Totals = lisTotals
+                                .GroupBy(m => m.label)
+                                .Select(m =>
+                                            m.Where(x => x.label == m.Key)
+                                            .Sum(m => m.total)
+                                ).ToList()
+            };
+        }
+
+        private static List<OrdersEntity> checkDateFilters(List<OrdersEntity> orders, DateTime? dateFrom, DateTime? dateTo)
+        {
+            if (!dateFrom.HasValue)
+            {
+                orders = orders.Where(m => m.PlacementDate.Date >= DateTime.Today).ToList();
+            }
+            else if (!dateTo.HasValue)
+            {
+                orders = orders.Where(m =>
+                        m.PlacementDate.Date >= dateFrom.Value.Date &&
+                        m.PlacementDate.Date <= DateTime.Today
+                    ).ToList();
+            }
+            else
+            {
+                orders = orders.Where(m =>
+                        m.PlacementDate.Date >= dateFrom.Value.Date &&
+                        m.PlacementDate.Date <= dateTo.Value.Date
+                    ).ToList();
+            }
+            return orders;
+        }
+
+        private async Task<string> GetCurrentTableName(int tableId)
+        {
+            string result = string.Empty;
+            var currentTable = await dbContext.Tables.FirstOrDefaultAsync(m => m.TableId == tableId);
+
+            if (currentTable != null)
+            {
+                result = currentTable.Table;
+            }
+            return result;
+        }
+        public async Task<OrderTotalViewModel> GetTotalByDeliveryAsync(OrderTotalRequest request)
+        {
+            List<(decimal? total, string label)> lisTotals = new List<(decimal? total, string label)>();
+
+            OrderTotalViewModel result = new OrderTotalViewModel();
+            var orders = await dbContext.Orders.Where(m => m.RestaurantId == request.RestaurantId).ToListAsync();
+            orders = checkDateFilters(orders, request.DateFrom, request.DateTo);
+
+            if (orders.Any())
+            {
+                foreach (var order in orders)
+                {
+                    var invoce = await dbContext.Invoices.Where(m => m.OrderId == order.OrderId).FirstOrDefaultAsync();
+                    if (invoce == null)
+                    {
+                        continue;
+                    }
+
+                    string ClientName = await GetCurrentClient(invoce.ClientId);
+                    if (!string.IsNullOrEmpty(ClientName))
+                    {
+                        lisTotals.Add((order.Total, ClientName));
+                    }
+                    else
+                    {
+                        lisTotals.Add((order.Total, "Sin delivery"));
+                    }
+                }
+            }
+
+            if (lisTotals.Any())
+            {
+                result = TotalToOrderTotalViewModel(lisTotals);
+
+            }
+
+            return result;
+        }
+
+        private async Task<string> GetCurrentClient(int? clientId)
+        {
+            string result = string.Empty;
+            var currentClient = await dbContext.Clients.FirstOrDefaultAsync(m => m.ClientId == clientId);
+
+            if (currentClient != null)
+            {
+                result = $"{currentClient.Name} {currentClient.LastName}";
+            }
+            return result;
+        }
     }
 
 }

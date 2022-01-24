@@ -39,6 +39,30 @@ namespace Pandora.Controllers
             return await OrderService.GetAsync(request).ConfigureAwait(false);
         }
 
+        [HttpGet("TotalsByTables")]
+        //[JwtAuthorize("Hydra.Accounts.Read")]
+        [ProducesResponseType(typeof(OrderTotalViewModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<OrderTotalViewModel> GetTotalByTablesAsync([FromQuery] OrderTotalRequest request)
+        {
+            return await OrderService.GetTotalByTablesAsync(request).ConfigureAwait(false);
+        }
+
+        [HttpGet("TotalsByDelivery")]
+        //[JwtAuthorize("Hydra.Accounts.Read")]
+        [ProducesResponseType(typeof(OrderTotalViewModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<OrderTotalViewModel> GetTotalByDeliveryAsync([FromQuery] OrderTotalRequest request)
+        {
+            return await OrderService.GetTotalByDeliveryAsync(request).ConfigureAwait(false);
+        }
+
         [HttpPost]
         //[JwtAuthorize("Hydra.Accounts.Read")]
         [ProducesResponseType(typeof(Result<OrderResult>), StatusCodes.Status200OK)]
