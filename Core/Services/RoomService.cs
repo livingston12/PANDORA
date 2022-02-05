@@ -103,6 +103,7 @@ namespace Pandora.Services
         {
             Response<TableViewModel> result = null;
             var total = await query.CountAsync().ConfigureAwait(false);
+
             if (total > 0)
             {
                 var data = MapToViewModelTables(query);
@@ -116,7 +117,7 @@ namespace Pandora.Services
             }
             return result;
         }
-        private IEnumerable<TableViewModel> MapToViewModelTables(IQueryable<TablesEntity> query)
+        private static IEnumerable<TableViewModel> MapToViewModelTables(IQueryable<TablesEntity> query)
         {
             return query
                     .Select(m => new TableViewModel
@@ -128,6 +129,49 @@ namespace Pandora.Services
                         RoomId = m.RoomId,
                         IsReserved = m.IsReserved
                     });
+        }
+
+        public async Task<Response<RoomViewModel>> GetSummaryAsync(int restaurantId)
+        {
+            Response<RoomViewModel> result = null;
+            var roomIds = dbContext.Tables
+                                    .Where(m => m.RestaurantId == restaurantId)
+                                    .Select(m => m.RoomId)
+                                    .Distinct();
+
+            var total = await roomIds.CountAsync().ConfigureAwait(false);
+
+            if (total > 0)
+            {
+                var query = await dbContext.Rooms
+                                            .Where(m => roomIds.Contains(m.RoomId))
+                                            .Include(m => m.Tables)
+                                            .ToListAsync()
+                                            .ConfigureAwait(false);
+
+                var data = MapToViewModelRooms(query);
+
+                result = new Response<RoomViewModel>()
+                {
+                    List = data,
+                    PageIndex = 1,
+                    PageSize = total,
+                    Total = total
+                };
+            }
+
+            return result;
+        }
+
+        private static IEnumerable<RoomViewModel> MapToViewModelRooms(List<RoomsEntity> query)
+        {
+            return query.Select(m => new RoomViewModel
+            {
+                RoomId = m.RoomId,
+                Room = m.Room,
+                Description = m.Description,
+                Tables = m.Tables
+            });
         }
     }
 
