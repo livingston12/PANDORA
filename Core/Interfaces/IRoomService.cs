@@ -8,6 +8,7 @@ namespace Pandora.Core.Interfaces
     public interface IRoomService : IPandoraService
     {
         Task<Response<RoomViewModel>> GetAsync(RoomRequest filter);
+        Task<Response<RoomViewModel>> GetSummaryAsync(int restaurantId);
         Task<Response<TableViewModel>> GetTablesAsync(int roomId);
     }
 }
