@@ -20,7 +20,6 @@ namespace Pandora.Core.Models.Requests
         public DateTime? DateFrom { get; set; }
         [NotMapped]
         public DateTime? DateTo { get; set; }
-
         [RegularExpression(@"E|T|C|''", ErrorMessage = "Los status permitido son (E(Efectivo), T(Tarjeta) or C(Cheque))")]
         public string PaymentMethod { get; set; }
         public int? RestaurantId { get; set; }

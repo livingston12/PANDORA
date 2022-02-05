@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -113,9 +114,9 @@ namespace Pandora.Services
                     }
                 }
             }
-            catch (System.Exception)
+            catch (Exception ex)
             {
-
+                throw new Exception($"Error inesperado: {ex.Message}");
             }
 
             return isReserved;
@@ -140,6 +141,7 @@ namespace Pandora.Services
                     break;
                 }
             }
+
             return result;
         }
     }

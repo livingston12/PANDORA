@@ -42,8 +42,8 @@ namespace Pandora
                     builder =>
                         builder.AllowAnyHeader()
                         .AllowAnyMethod()
-                        .WithOrigins("http://localhost","http://localhost:8080")
-                        
+                        .WithOrigins("http://localhost", "http://localhost:8080")
+
                 );
             });
 
@@ -67,8 +67,7 @@ namespace Pandora
             services.AddTransient<IClientService, ClientService>();
             services.AddTransient<IIngredientService, IngredientService>();
             services.AddTransient<ICategoriesService, CategoryService>();
-            services.AddTransient<IInvoiceService, InvoceService>();            
-
+            services.AddTransient<IInvoiceService, InvoceService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

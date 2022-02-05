@@ -342,7 +342,6 @@ namespace Pandora.Services
             }
             catch (System.Exception ex)
             {
-
                 throw new Exception($"Error inesperado al actualizar inventario: {ex.Message}");
             }
 
