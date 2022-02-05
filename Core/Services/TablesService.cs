@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -89,13 +90,17 @@ namespace Pandora.Services
                 .Where(m => m.Active);
         }
 
-        public async Task<bool> ReservedAsync(int tableId)
+        public async Task<bool> ReservedAsync(TableReservedRequest request)
         {
-            var currentTable = await dbContext.Tables.Where(m => m.TableId == tableId).FirstOrDefaultAsync();
+            Check.NotNull(request, nameof(request));
+
+            var currentTable = await dbContext.Tables.Where(m => m.TableId == request.TableId).FirstOrDefaultAsync();
             bool isReserved = false;
             try
             {
-                if (currentTable != null)
+                var canReserve = await checkDish(request.OrderDetail).ConfigureAwait(false);
+
+                if (currentTable != null && canReserve)
                 {
                     isReserved = currentTable.IsReserved.HasValue ?
                     currentTable.IsReserved.Value : false;
@@ -109,13 +114,35 @@ namespace Pandora.Services
                     }
                 }
             }
-            catch (System.Exception)
+            catch (Exception ex)
             {
-
+                throw new Exception($"Error inesperado: {ex.Message}");
             }
 
-
             return isReserved;
+        }
+
+        private async Task<bool> checkDish(IEnumerable<OrderDetail> request)
+        {
+            Check.NotNull(request, nameof(request));
+            bool result = true;
+
+            IEnumerable<int> listIds = request.Select(m => m.DishId);
+            var listDishes = await dbContext.Dishes
+                                                .Where(m => listIds.Contains(m.DishId))
+                                                .ToListAsync();
+
+            foreach (var dish in listDishes)
+            {
+                var currentRequest = request.FirstOrDefault(m => m.DishId == dish.DishId);
+                if (currentRequest.Quantity > dish.Quantity)
+                {
+                    result = false;
+                    break;
+                }
+            }
+
+            return result;
         }
     }
 

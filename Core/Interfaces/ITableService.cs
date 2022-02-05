@@ -8,6 +8,6 @@ namespace Pandora.Core.Interfaces
     public interface ITableService : IPandoraService
     {
         Task<Response<TableViewModel>> GetAsync(TableRequest filter);
-        Task<bool> ReservedAsync(int tableId);
+        Task<bool> ReservedAsync(TableReservedRequest tableId);
     }
 }
