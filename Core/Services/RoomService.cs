@@ -148,7 +148,7 @@ namespace Pandora.Services
                                             .Include(m => m.Tables)
                                             .ToListAsync()
                                             .ConfigureAwait(false);
-                                            
+
                 var data = MapToViewModelRooms(query);
 
                 result = new Response<RoomViewModel>()
@@ -159,6 +159,7 @@ namespace Pandora.Services
                     Total = total
                 };
             }
+
             return result;
         }
 
