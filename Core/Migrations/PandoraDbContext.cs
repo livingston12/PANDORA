@@ -14,7 +14,7 @@ namespace Pandora.Core.Migrations
         public DbSet<MenusEntity> Menus { get; set; }
         public DbSet<DishesEntity> Dishes { get; set; }
         public DbSet<CategoryEntity> Categories { get; set; }
-        public DbSet<InvoicesEntity> Invoices { get; set; }
+        public DbSet<InvoiceEntity> Invoices { get; set; }
         public DbSet<ClientsEntity> Clients { get; set; }
         public DbSet<IngredientEntity> Ingredients { get; set; }
         public DbSet<DishesDetailEntity> DishDetails { get; set; }

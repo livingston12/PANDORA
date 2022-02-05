@@ -45,7 +45,7 @@ namespace Pandora.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> ReservedAsync([FromBody] TableReservedRequest request)
         {
-            var isReserved = await TableService.ReservedAsync(request.TableId).ConfigureAwait(false);
+            var isReserved = await TableService.ReservedAsync(request).ConfigureAwait(false);
             return Ok(isReserved);
         }
 

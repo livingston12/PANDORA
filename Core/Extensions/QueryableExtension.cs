@@ -15,24 +15,6 @@ namespace Pandora.Core.Extensions
 {
     public static class QueryableExtension
     {
-        public static IQueryable<TSource> FilterList<TSource>(this IQueryable<TSource> source, string data, string field)
-            where TSource : Entity
-        {
-            var result = source;
-            if (data.IsNotNullOrEmpty())
-            {
-                var list = data.AsList();
-                result = source.Where(s => list.Contains(s.GetType().GetProperty(field).GetValue(s, null)));
-            }
-            return result;
-        }
-
-        public static IQueryable<TSource> FilterList<TSource>(this IQueryable<TSource> source, IEnumerable<string> data, string field)
-            where TSource : Entity
-        {
-            return source.Where(s => data.Contains(s.GetType().GetProperty(field).GetValue(s, null) as string));
-        }
-
         public static IQueryable<TSource> OrderBy<TSource>(this IQueryable<TSource> source, string sorting)
             where TSource : Entity
         {

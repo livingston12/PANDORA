@@ -67,6 +67,7 @@ namespace Pandora
             services.AddTransient<IClientService, ClientService>();
             services.AddTransient<IIngredientService, IngredientService>();
             services.AddTransient<ICategoriesService, CategoryService>();
+            services.AddTransient<IInvoiceService, InvoceService>();            
 
         }
 

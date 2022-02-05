@@ -94,6 +94,8 @@ namespace Pandora.Services
                         result = await SaveInvoiceAsync(request.Invoice, result).ConfigureAwait(false);
                         await dbContext.SaveChangesAsync();
 
+                        int isDiscountable = await DiscountInventoryAsync(orderEntity.ItemsQuantity, ordersDetail).ConfigureAwait(false);
+
                         result.StatusCode = "201";
                         result.Message = "Orden creada correctamente";
                         await tran.CommitAsync();
@@ -140,7 +142,6 @@ namespace Pandora.Services
 
         private decimal? GetPriceOfItem(int dishId)
         {
-
             var currenDish = dbContext.Dishes.Where(x => x.DishId == dishId).FirstOrDefault();
             return currenDish.Price;
         }
@@ -175,6 +176,34 @@ namespace Pandora.Services
                 {
                     result.Data.Errors.Add(error);
                 }
+            }
+
+            return result;
+        }
+
+        private async Task<Result<OrderResult>> validateInvoice(InvoicesRequest invoice)
+        {
+            var result = new Result<OrderResult>();
+            List<string> errors = new List<string>();
+            List<string> paymentAvalible = new List<string>
+            (
+                new List<string>() { "E", "T" }
+            );
+            result.Data = new OrderResult(new Dictionary<string, IEnumerable<string>>());
+
+            var currentTable = await dbContext.Tables.Where(m => m.TableId == invoice.TableId).FirstOrDefaultAsync();
+
+            if (currentTable == null)
+            {
+                errors.Add("La mesa no existe");
+            }
+            if (!paymentAvalible.Contains(invoice.PaymentMethod))
+            {
+                errors.Add("Los metodos de pagos dispoibles son <b>Efectivo</b> o <b>Tarjeta</b>");
+            }
+            if (errors.Any())
+            {
+                result.Data.Errors.Add("1", errors);
             }
 
             return result;
@@ -215,6 +244,16 @@ namespace Pandora.Services
             return result;
         }
 
+        private List<KeyValuePair<string, IEnumerable<string>>> errorMessages(List<(string Index, IEnumerable<string> Text)> messages)
+        {
+            return messages
+               .AsEnumerable()
+               .Select(item =>
+                  new KeyValuePair<string, IEnumerable<string>>(item.Index, item.Text)
+               )
+           .ToList();
+        }
+
         private async Task<Result<OrderResult>> SaveDetailsAsync(IEnumerable<OrdersDetailEntity> ordersDetail)
         {
             var result = new Result<OrderResult>();
@@ -240,7 +279,7 @@ namespace Pandora.Services
         {
             if (int.TryParse(result.Data.OrderId, out int orderId))
             {
-                InvoicesEntity invoiceEntity = new InvoicesEntity()
+                InvoiceEntity invoiceEntity = new InvoiceEntity()
                 {
                     ClientId = invoice.ClientId,
                     OrderId = orderId,
@@ -258,42 +297,61 @@ namespace Pandora.Services
             return result;
         }
 
-        private async Task<Result<OrderResult>> validateInvoice(InvoicesRequest invoice)
+        private async Task<int> DiscountInventoryAsync(int itemsQuantity, IEnumerable<OrdersDetailEntity> ordersDetail)
         {
-            var result = new Result<OrderResult>();
-            List<string> errors = new List<string>();
-            List<string> paymentAvalible = new List<string>
-            (
-                new List<string>() { "E", "T" }
-            );
-            result.Data = new OrderResult(new Dictionary<string, IEnumerable<string>>());
+            Check.NotNull(ordersDetail, nameof(ordersDetail));
+            int result = 0;
 
-            var currentTable = await dbContext.Tables.Where(m => m.TableId == invoice.TableId).FirstOrDefaultAsync();
+            try
+            {
+                foreach (var di in ordersDetail)
+                {
+                    // Update current dish Quantity 
+                    int? dishId = di.DishId;
+                    var dish = await dbContext.Dishes
+                                                .FirstOrDefaultAsync(m => m.DishId == dishId);
 
-            if (currentTable == null)
-            {
-                errors.Add("La mesa no existe");
+                    if (checkMaximumNumber(dish.Quantity, itemsQuantity))
+                    {
+                        throw new Exception($"El plato solo tiene <b>({dish.Quantity})</b> en inventario y esta comprando <b>({itemsQuantity})</b>");
+                    }
+
+                    dish.Quantity -= itemsQuantity;
+
+                    dbContext.Entry(dish);
+
+                    var dishesDetail = await dbContext.DishDetails.Where(m => m.DishId == dishId).ToListAsync();
+
+                    // Update ingredients quantity from dish detail 
+                    foreach (var dishDetail in dishesDetail)
+                    {
+                        var ingredient = await dbContext.Ingredients.FirstOrDefaultAsync(m => m.IngredientId == dishDetail.IngredientId);
+
+                        if (checkMaximumNumber(ingredient.Quantity, dishDetail.Quantity))
+                        {
+                            throw new Exception($"El ingrediente ({ingredient.Ingredient}) del plato ({dish.Dish}) no tiene la disponibilidad requerida");
+                        }
+
+                        ingredient.Quantity -= dishDetail.Quantity;
+
+                        dbContext.Entry(ingredient);
+                    }
+
+                    result = await dbContext.SaveChangesAsync();
+                }
             }
-            if (!paymentAvalible.Contains(invoice.PaymentMethod))
+            catch (System.Exception ex)
             {
-                errors.Add("Los metodos de pagos dispoibles son <b>Efectivo</b> o <b>Tarjeta</b>");
-            }
-            if (errors.Any())
-            {
-                result.Data.Errors.Add("1", errors);
+
+                throw new Exception($"Error inesperado al actualizar inventario: {ex.Message}");
             }
 
             return result;
         }
 
-        private List<KeyValuePair<string, IEnumerable<string>>> errorMessages(List<(string Index, IEnumerable<string> Text)> messages)
+        private static bool checkMaximumNumber(int? maximun, int? minimun)
         {
-            return messages
-               .AsEnumerable()
-               .Select(item =>
-                  new KeyValuePair<string, IEnumerable<string>>(item.Index, item.Text)
-               )
-           .ToList();
+            return maximun < minimun;
         }
 
         public async Task<Response<OrderViewModel>> GetAsync(OrderRequest filter)
