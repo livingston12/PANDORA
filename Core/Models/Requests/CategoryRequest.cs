@@ -9,5 +9,7 @@ namespace Pandora.Core.Models.Requests
         public string Category { get; set; }
         [NotMapped]
         public string MenuIds { get; set; }
+        [NotMapped]
+        public int? RestaurantId { get; set; }
     }
 }

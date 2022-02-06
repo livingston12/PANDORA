@@ -39,16 +39,16 @@ namespace Pandora.Controllers
             return await CategoryService.GetAsync(request).ConfigureAwait(false);
         }
 
-        [HttpGet("summary")]
+        [HttpGet("summary/{restaurantId}")]
         //[JwtAuthorize("Hydra.Accounts.Read")]
         [ProducesResponseType(typeof(Response<CategoryViewModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<Response<CategoryViewModel>> GetSummaryAsync()
+        public async Task<Response<CategoryViewModel>> GetSummaryAsync(int? restaurantId)
         {
-            return await CategoryService.GetSummaryAsync().ConfigureAwait(false);
+            return await CategoryService.GetSummaryAsync(restaurantId).ConfigureAwait(false);
         }
 
         [HttpPost]

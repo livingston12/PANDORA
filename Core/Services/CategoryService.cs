@@ -49,8 +49,10 @@ namespace Pandora.Services
 
         private IQueryable<CategoryEntity> GetQuery(CategoryRequest filter)
         {
+            var menusIds = GetMenuIds(filter.RestaurantId);
             var query = dbContext
                             .Categories
+                            .Where(m => menusIds.Contains(m.MenuId))
                             .Include(m => m.Menu)
                             .AsQueryable();
 
@@ -58,6 +60,13 @@ namespace Pandora.Services
             query = query.OrderBy(filter.Sort);
 
             return query;
+        }
+
+        private IEnumerable<int> GetMenuIds(int? restaurantId)
+        {
+            return dbContext.Menus
+                        .Where(m => m.RestaurantId == restaurantId)
+                        .Select(m => m.MenuId);
         }
 
         private static IQueryable<CategoryEntity> ApplyFilters(IQueryable<CategoryEntity> query, CategoryRequest filter)
@@ -100,11 +109,13 @@ namespace Pandora.Services
                 });
         }
 
-        public async Task<Response<CategoryViewModel>> GetSummaryAsync()
+        public async Task<Response<CategoryViewModel>> GetSummaryAsync(int? restaurantId)
         {
             Response<CategoryViewModel> result = null;
-            var query = dbContext.Categories.Include(m => m.Menu);
+            var menuIds = GetMenuIds(restaurantId);
+            var query = dbContext.Categories.Where(m => menuIds.Contains(m.MenuId)).Include(m => m.Menu);
             var total = await query.CountAsync().ConfigureAwait(false);
+            
             if (total > 0)
             {
                 result = new Response<CategoryViewModel>()
