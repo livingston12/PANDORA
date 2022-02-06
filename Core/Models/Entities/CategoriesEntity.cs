@@ -12,6 +12,9 @@ namespace Pandora.Core.Models.Entities
         public int CategoryId { get; set; }
         [Required]
         public string Category { get; set; }
+        [Required]
         public int MenuId { get; set; }
+        [ForeignKey(nameof(MenuId))]
+        public MenusEntity Menu { get; set; }
     }
 }

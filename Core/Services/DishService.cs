@@ -162,6 +162,7 @@ namespace Pandora.Services
             var result = await dbContext.Dishes
                 .Where(m => m.Dish == dish)
                 .FirstOrDefaultAsync();
+                
             return result;
         }
         private async Task<(DishResult dataResult, string statusCode, string message)> SaveAsync(DishViewModelCreate request, DishResult dishResult)
@@ -470,22 +471,22 @@ namespace Pandora.Services
             List<string> dataError = new List<string>();
             UpdateResult result = new UpdateResult(new Dictionary<string, IEnumerable<string>>());
 
-            if (dish == null)
+            try
             {
-                dataError.Add("El plato no existe");
-            }
-            else
-            {
-                var dishDetails = dbContext.DishDetails
-                    .Where(x => x.DishId == dishId);
-
-                if (dishDetails.Any())
+                if (dish == null)
                 {
-                    dbContext.RemoveRange(dishDetails);
+                    dataError.Add("El plato no existe");
                 }
-
-                dbContext.Remove(dish);
-                await dbContext.SaveChangesAsync();
+                else
+                {
+                    RemoveDishRelation(dishId);
+                    dbContext.Remove(dish);
+                    await dbContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                dataError.Add($"Error inesperado: {ex.Message}");
             }
 
             if (dataError.Any())
@@ -494,6 +495,45 @@ namespace Pandora.Services
             }
 
             return result;
+        }
+
+        private void RemoveDishRelation(int dishId)
+        {
+            List<string> dataError = new List<string>();
+            try
+            {
+                var dishDetails = dbContext.DishDetails
+                   .Where(m => m.DishId == dishId);
+                var orderIds = dbContext.OrdersDetail
+                                    .Where(m => m.DishId == dishId)
+                                    .Select(m => m.OrderId);
+
+                var orderDetails = dbContext.OrdersDetail.Where(m => orderIds.Contains(m.OrderId));
+                var orders = dbContext.Orders.Where(m => orderIds.Contains(m.OrderId));
+                var invoices = dbContext.Invoices.Where(m => orderIds.Contains(m.OrderId));
+
+                if (dishDetails.Any())
+                {
+                    dbContext.RemoveRange(dishDetails);
+                }
+                if (orderDetails.Any())
+                {
+                    dbContext.RemoveRange(orderDetails);
+                }
+                if (invoices.Any())
+                {
+                    dbContext.RemoveRange(invoices);
+                }
+                if (orders.Any())
+                {
+                    dbContext.RemoveRange(orders);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
         public async Task<UpdateResult> DeleteDetailAsync(int dishDetailId)
