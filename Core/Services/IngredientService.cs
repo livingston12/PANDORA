@@ -88,7 +88,8 @@ namespace Pandora.Services
                     Ingredient = m.Ingredient,
                     Price = m.Price,
                     Quantity = m.Quantity,
-                    RestaurantId = m.RestaurantId
+                    RestaurantId = m.RestaurantId,
+                    IsGarrison = m.IsGarrison
                 });
         }
 
@@ -110,7 +111,34 @@ namespace Pandora.Services
                         IngredientId = m.IngredientId,
                         Price = m.Price,
                         Quantity = m.Quantity,
-                        RestaurantId = m.RestaurantId
+                        RestaurantId = m.RestaurantId,
+                        IsGarrison = m.IsGarrison
+                    });
+            }
+
+            return result;
+        }
+
+        public async Task<IEnumerable<IngredientViewModel>> GetGarrisonsAsync(int restaurantId)
+        {
+            Check.NotNull(restaurantId, nameof(restaurantId));
+
+            IEnumerable<IngredientViewModel> result = null;
+            var query = dbContext.Ingredients
+                            .Where(m => m.RestaurantId == restaurantId && m.IsGarrison == true);
+            var total = await query.CountAsync().ConfigureAwait(false);
+
+            if (total > 0)
+            {
+                result = query
+                    .Select(m => new IngredientViewModel()
+                    {
+                        Ingredient = m.Ingredient,
+                        IngredientId = m.IngredientId,
+                        Price = m.Price,
+                        Quantity = m.Quantity,
+                        RestaurantId = m.RestaurantId,
+                        IsGarrison = m.IsGarrison
                     });
             }
 
@@ -245,7 +273,8 @@ namespace Pandora.Services
                 Ingredient = request.Ingredient,
                 Price = request.Price,
                 Quantity = request.Quantity,
-                RestaurantId = request.RestaurantId
+                RestaurantId = request.RestaurantId,
+                IsGarrison = request.IsGarrison
             };
             return result;
         }
@@ -292,6 +321,7 @@ namespace Pandora.Services
                     ingredient.Ingredient = request.Ingredient;
                     ingredient.Price = request.Price;
                     ingredient.Quantity = request.Quantity;
+                    ingredient.IsGarrison = request.IsGarrison;
 
                     dbContext.Entry(ingredient).State = EntityState.Modified;
                     await dbContext.SaveChangesAsync();
@@ -335,7 +365,5 @@ namespace Pandora.Services
             results.errors = errors;
             return results;
         }
-
-
     }
 }

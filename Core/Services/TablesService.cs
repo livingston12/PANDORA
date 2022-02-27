@@ -129,7 +129,9 @@ namespace Pandora.Services
 
             IEnumerable<int> listIds = request.Select(m => m.DishId);
             var listDishes = await dbContext.Dishes
-                                                .Where(m => listIds.Contains(m.DishId))
+                                                .Where(m => listIds.Contains(m.DishId) 
+                                                    && m.NeedGarrison != true
+                                                    && !m.Ingredients.Any())
                                                 .ToListAsync();
 
             foreach (var dish in listDishes)

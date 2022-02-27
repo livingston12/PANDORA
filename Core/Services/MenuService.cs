@@ -85,7 +85,7 @@ namespace Pandora.Services
                 });
         }
 
-        public async Task<Response<CategoryViewModel>> GetCategories(int menuId)
+        public async Task<Response<CategoryViewModel>> GetCategoriesAsync(int menuId)
         {
             Response<CategoryViewModel> result = null;
             var query = dbContext
@@ -121,7 +121,7 @@ namespace Pandora.Services
                 });
         }
 
-        public async Task<Response<DishViewModel>> GetDishes(int categoryId)
+        public async Task<Response<DishViewModel>> GetDishesByCategoryAsync(int categoryId)
         {
             Response<DishViewModel> result = null;
             var query = dbContext
@@ -157,8 +157,36 @@ namespace Pandora.Services
                      DishId = m.DishId,
                      ExpirationDate = m.ExpirationDate,
                      Price = m.Price,
-                     Quantity = m.Quantity
+                     Quantity = m.Quantity,
+                     NeedGarrison = m.NeedGarrison
                  });
+        }
+
+        public async Task<Response<DishViewModel>> GetDishesByMenusAsync(int menuId)
+        {
+            Response<DishViewModel> result = null;
+            var categoryIds = dbContext.Categories.Where(m => m.MenuId == menuId).Select(m => m.CategoryId);
+            var query = dbContext
+                            .Dishes
+                            .Where(m => m.CategoryId.HasValue)
+                            .Where(m => categoryIds.Contains(m.CategoryId.Value))
+                            .AsQueryable();
+
+            var total = await query.CountAsync().ConfigureAwait(false);
+            if (total > 0)
+            {
+                var data = MapToViewModelDish(query);
+
+                result = new Response<DishViewModel>()
+                {
+                    List = data,
+                    PageIndex = 1,
+                    PageSize = total,
+                    Total = total
+                };
+            }
+
+            return result;
         }
     }
 

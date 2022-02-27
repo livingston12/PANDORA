@@ -12,6 +12,7 @@ namespace Pandora.Core.Interfaces
     {
         Task<Response<IngredientViewModel>> GetAsync(IngredientRequest request);
         Task<IEnumerable<IngredientViewModel>> GetSummaryAsync(int restaurantId);
+        Task<IEnumerable<IngredientViewModel>> GetGarrisonsAsync(int restaurantId);
         Task<Result<IngredientResult>> CreateAsync(IngredientViewModel request);
         Task<UpdateResult> PutAsync(IngredientViewModel ingredient);
     }

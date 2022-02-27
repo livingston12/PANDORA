@@ -18,6 +18,8 @@ namespace Pandora.Core.Models.Entities
         public decimal? Discount { get; set; }
         public int? OrderId { get; set; }
         public int? DishId { get; set; }
+        public string Note { get; set; }
+
         [ForeignKey(nameof(OrderId))]
         public OrdersEntity Order { get; set; }
     }

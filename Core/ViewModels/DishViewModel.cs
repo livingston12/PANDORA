@@ -13,6 +13,7 @@ namespace Pandora.Core.ViewModels
         public int Quantity { get; set; }
         public DateTime? ExpirationDate { get; set; }
         public int? CategoryId { get; set; }
+        public bool? NeedGarrison { get; set; } = false;
         public CategoryEntity Category { get; set; }
         public IEnumerable<DishesDetailViewModel> Ingredients { get; set; }
     }
@@ -26,6 +27,7 @@ namespace Pandora.Core.ViewModels
         public int Quantity { get; set; }
         public DateTime? ExpirationDate { get; set; }
         public int? CategoryId { get; set; }
+        public bool? NeedGarrison { get; set; } = false;
         public IEnumerable<DishDetailViewModel> Ingredients { get; set; }
     }
 

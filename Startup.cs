@@ -9,6 +9,7 @@ using Pandora.Configurations;
 using Pandora.Core.Attributes;
 using Pandora.Core.Interfaces;
 using Pandora.Core.Migrations;
+using Pandora.Core.Models.Dtos;
 using Pandora.Managers;
 using Pandora.Services;
 
@@ -20,12 +21,15 @@ namespace Pandora
         {
             Configuration = configuration;
         }
+        public AllowsOriginsDto AllowsOriginsDto { get; private set; }
 
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var origins = Configuration.GetSection("origins").Value.Split(',');
+
             services.AddControllersWithViews(options =>
                       {
                           options.UseGeneralRoutePrefix(Configuration.GetSection("Api:context").Value
@@ -40,16 +44,15 @@ namespace Pandora
             {
                 options.AddPolicy("AllowAllOrigin",
                     builder =>
-                        builder.AllowAnyHeader()
+                        builder
+                        .WithOrigins(origins)                       
+                        .AllowAnyHeader()
                         .AllowAnyMethod()
-                        .WithOrigins("http://localhost", "http://localhost:8080")
-
                 );
             });
 
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen();
-
             services.AddDbContextPool<PandoraDbContext>(options =>
                options.UseSqlServer(Configuration.GetConnectionString("PandoraDB"),
                sqlOptions => sqlOptions.CommandTimeout(60))
@@ -73,9 +76,10 @@ namespace Pandora
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseCors("AllowAllOrigin");
+
             if (env.IsDevelopment())
             {
-                app.UseCors("AllowAllOrigin");
                 app.UseDeveloperExceptionPage();
             }
             // Enable middleware to serve generated Swagger as a JSON endpoint.
@@ -88,6 +92,7 @@ namespace Pandora
             });
             app.UseHttpsRedirection();
             app.UseRouting();
+            app.UseStaticFiles();
 
             app.UseAuthorization();
 
