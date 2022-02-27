@@ -34,6 +34,7 @@ namespace Pandora.Services
             {
                 name = cleanValues(name);
                 directory = cleanValues(directory);
+
                 string directoryImage = IO.Path.Combine(UrlBase, directory);
                 string urlImage = GetURLFile(directoryImage, name);
 
@@ -58,6 +59,11 @@ namespace Pandora.Services
             {
                 throw new Exception("No tiene acceso para acceder a la ruta", ex);
             }
+            catch (Exception ex)
+            {
+                throw new Exception("Error de ruta: " + UrlBase + "-" + ex.ToString());
+            }
+
 
             return result;
         }
@@ -65,11 +71,12 @@ namespace Pandora.Services
         private string GetURLFile(string directoryImage, string fileName)
         {
             string urlImage = string.Empty;
+            fileName = fileName.ToLower();
             string[] directoryFiles = IO.Directory.GetFiles(directoryImage)
-                                          .Where(x => x.Contains(fileName))
+                                          .Where(x => x.ToLower().Contains(fileName))
                                           .ToList()
                                           .Select(x => x.Split("\\"))
-                                          .Where(x => x.LastOrDefault().Split(".")[0] == fileName)
+                                          .Where(x => x.LastOrDefault().ToLower().Split(".")[0] == fileName)
                                           .FirstOrDefault();
             if (directoryFiles != null)
             {

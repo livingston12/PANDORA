@@ -32,9 +32,17 @@ namespace Pandora.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetAsync(string directory, string name)
         {
-            var result = await ImageService.GetAsync(directory, name);
-            var contentType = $"image/${result.extention}";
-            return File(result.file, contentType);
+            try
+            {
+                var result = await ImageService.GetAsync(directory, name);
+                var contentType = $"image/${result.extention}";
+                return File(result.file, contentType);
+            }
+            catch (System.Exception ex)
+            {
+                return Content(ex.Message);
+            }
+
         }
 
         [HttpPost()]

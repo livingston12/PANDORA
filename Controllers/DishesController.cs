@@ -39,6 +39,7 @@ namespace Pandora.Controllers
         {
             return await DishService.GetAsync(request).ConfigureAwait(false);
         }
+        
         [HttpPost]
         //[JwtAuthorize("Hydra.Accounts.Read")]
         [ProducesResponseType(typeof(Result<DishResult>), StatusCodes.Status200OK)]

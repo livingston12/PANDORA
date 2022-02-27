@@ -44,9 +44,21 @@ namespace Pandora.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<Response<CategoryViewModel>> GetCategories(int menuId)
+        public async Task<Response<CategoryViewModel>> GetCategoriesAsync(int menuId)
         {
-            return await MenuService.GetCategories(menuId);
+            return await MenuService.GetCategoriesAsync(menuId);
+        }
+
+        [HttpGet("{menuId}/dishesmenu")]
+        //[JwtAuthorize("Hydra.Accounts.Read")]
+        [ProducesResponseType(typeof(Response<DishViewModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<Response<DishViewModel>> GetDishesByMenusAsync(int menuId)
+        {
+            return await MenuService.GetDishesByMenusAsync(menuId);
         }
 
         [HttpGet("{categoryId}/Dishes")]
@@ -56,9 +68,9 @@ namespace Pandora.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<Response<DishViewModel>> GetDishes(int categoryId)
+        public async Task<Response<DishViewModel>> GetDishesByCategoryAsync(int categoryId)
         {
-            return await MenuService.GetDishes(categoryId);
+            return await MenuService.GetDishesByCategoryAsync(categoryId);
         }
 
 

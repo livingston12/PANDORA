@@ -40,6 +40,7 @@ namespace Pandora.Controllers
         {
             return await IngredientService.GetAsync(request).ConfigureAwait(false);
         }
+
         [HttpGet("summary/{restaurantId}")]
         //[JwtAuthorize("Hydra.Accounts.Read")]
         [ProducesResponseType(typeof(IEnumerable<IngredientViewModel>), StatusCodes.Status200OK)]
@@ -51,6 +52,19 @@ namespace Pandora.Controllers
         {
             return await IngredientService.GetSummaryAsync(restaurantId).ConfigureAwait(false);
         }
+
+        [HttpGet("garrisons/{restaurantId}")]
+        //[JwtAuthorize("Hydra.Accounts.Read")]
+        [ProducesResponseType(typeof(IEnumerable<IngredientViewModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IEnumerable<IngredientViewModel>> GetGarrisonsAsync([FromRoute] int restaurantId)
+        {
+            return await IngredientService.GetGarrisonsAsync(restaurantId).ConfigureAwait(false);
+        }
+
         [HttpPost]
         //[JwtAuthorize("Hydra.Accounts.Read")]
         [ProducesResponseType(typeof(Result<IngredientResult>), StatusCodes.Status200OK)]

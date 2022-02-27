@@ -67,13 +67,14 @@ namespace Pandora.Services
             {
                 OrdersEntity orderEntity = OrderToEntity(request);
                 IEnumerable<OrdersDetailEntity> ordersDetail = request.OrdersDetail
-                .Select(x => new OrdersDetailEntity
+                .Select(m => new OrdersDetailEntity
                 {
                     Discount = orderEntity.Discount,
-                    DishId = x.DishId,
+                    DishId = m.DishId,
                     OrderId = orderEntity.OrderId,
-                    Quantity = x.Quantity,
-                    Price = GetPriceOfItem(x.DishId)
+                    Quantity = m.Quantity,
+                    Note = m.Note,
+                    Price = GetPriceOfItem(m.DishId)
                 });
                 result = await ChekOrderDetail(ordersDetail, request);
 
@@ -94,7 +95,7 @@ namespace Pandora.Services
                         result = await SaveInvoiceAsync(request.Invoice, result).ConfigureAwait(false);
                         await dbContext.SaveChangesAsync();
 
-                        int isDiscountable = await DiscountInventoryAsync(orderEntity.ItemsQuantity, ordersDetail).ConfigureAwait(false);
+                        int isDiscountable = await DiscountInventoryAsync(orderEntity.ItemsQuantity, ordersDetail, request.Garrisons).ConfigureAwait(false);
 
                         result.StatusCode = "201";
                         result.Message = "Orden creada correctamente";
@@ -150,6 +151,7 @@ namespace Pandora.Services
         {
             int restaurantId = request.RestaurantId;
             var result = await validateInvoice(request.Invoice);
+
             if (!result.Data.Errors.Any())
             {
                 result = new Result<OrderResult>();
@@ -161,9 +163,8 @@ namespace Pandora.Services
                 {
                     index++;
                     var currenDish = await dbContext.Dishes.Where(x => x.DishId == item.DishId).FirstOrDefaultAsync();
+                    var error = await validateOrderItem(index, item, currenDish, request.Garrisons, restaurantId);
 
-
-                    var error = await validateOrderItem(index, item, currenDish, restaurantId);
                     if (error.Text.Any())
                     {
                         messages.Add(error);
@@ -209,7 +210,7 @@ namespace Pandora.Services
             return result;
         }
 
-        private async Task<(string Index, IEnumerable<string> Text)> validateOrderItem(int index, OrdersDetailEntity item, DishesEntity currenDish, int restaurantId)
+        private async Task<(string Index, IEnumerable<string> Text)> validateOrderItem(int index, OrdersDetailEntity item, DishesEntity currenDish, IEnumerable<GarrisonsRequest> Garrisons, int restaurantId)
         {
             (string Index, IEnumerable<string> Text) result = ("", new List<string>());
             List<string> errors = new List<string>();
@@ -234,6 +235,19 @@ namespace Pandora.Services
                 {
                     errors.Add($"<b>{currenDish.Dish}:</b> no puede tener el precio mayor que cero");
                 }
+                if (Garrisons == null && currenDish.NeedGarrison == true)
+                {
+                    errors.Add($"El plato <b>{currenDish.Dish}</b> requiere Guarnicion");
+                }
+                else if (currenDish.NeedGarrison == true)
+                {
+                    List<string> garrisonErrors = await validateGarrisons(currenDish.DishId, currenDish.Dish, Garrisons);
+
+                    if (garrisonErrors.Any())
+                    {
+                        errors.AddRange(garrisonErrors);
+                    }
+                }
             }
             if (errors.Any())
             {
@@ -243,7 +257,37 @@ namespace Pandora.Services
 
             return result;
         }
+        private async Task<List<string>> validateGarrisons(int? dishId, string dish, IEnumerable<GarrisonsRequest> garrisons)
+        {
+            List<string> errors = new List<string>();
 
+            var listGarrisons = garrisons.Where(m => m.DishId == dishId);
+            var ingredientIds = listGarrisons.Select(m => m.IngredientId);
+
+            if (!listGarrisons.Any())
+            {
+                errors.Add($"El plato <b>{dish}:</b> requiere Guarnicion");
+            }
+            else if (listGarrisons.Any())
+            {
+                var notQuantities = listGarrisons.FirstOrDefault(m => m.Quantity <= 0);
+                if (notQuantities != null)
+                {
+                    errors.Add($"El plato <b>{dish}:</b> requiere cantidad en las guarniciones");
+                }
+            }
+            else
+            {
+                var ingredientExist = await dbContext.Ingredients.Where(m => ingredientIds.Contains(m.IngredientId)).AnyAsync();
+
+                if (!ingredientExist)
+                {
+                    errors.Add($"Los <b>ingredientes de la guarnicion</b> deben existir en el plato (<b>{dish}:</b>)");
+                }
+            }
+
+            return errors;
+        }
         private List<KeyValuePair<string, IEnumerable<string>>> errorMessages(List<(string Index, IEnumerable<string> Text)> messages)
         {
             return messages
@@ -297,9 +341,8 @@ namespace Pandora.Services
             return result;
         }
 
-        private async Task<int> DiscountInventoryAsync(int itemsQuantity, IEnumerable<OrdersDetailEntity> ordersDetail)
+        private async Task<int> DiscountInventoryAsync(int itemsQuantity, IEnumerable<OrdersDetailEntity> ordersDetail, IEnumerable<GarrisonsRequest> garrisons)
         {
-            Check.NotNull(ordersDetail, nameof(ordersDetail));
             int result = 0;
 
             try
@@ -310,31 +353,67 @@ namespace Pandora.Services
                     int? dishId = di.DishId;
                     var dish = await dbContext.Dishes
                                                 .FirstOrDefaultAsync(m => m.DishId == dishId);
-
-                    if (checkMaximumNumber(dish.Quantity, itemsQuantity))
-                    {
-                        throw new Exception($"El plato solo tiene <b>({dish.Quantity})</b> en inventario y esta comprando <b>({itemsQuantity})</b>");
-                    }
-
-                    dish.Quantity -= itemsQuantity;
-
-                    dbContext.Entry(dish);
+                    
 
                     var dishesDetail = await dbContext.DishDetails.Where(m => m.DishId == dishId).ToListAsync();
+                    if (!dishesDetail.Any() && garrisons.Any())
+                    {
+                        var details = garrisons
+                            .Select(m => new DishesDetailEntity()
+                            {
+                                DishId = m.DishId.Value
+                            })
+                            .ToList();
+                        dishesDetail.AddRange(details);
+                    }
+                    else if (!dishesDetail.Any())
+                    {
+                        if (checkMaximumNumber(dish.Quantity, di.Quantity))
+                        {
+                            throw new Exception($"El plato solo tiene <b>({dish.Quantity})</b> en inventario y esta comprando <b>({itemsQuantity})</b>");
+                        }
 
+                        dish.Quantity -= di.Quantity;
+                        dbContext.Entry(dish);
+                    }
                     // Update ingredients quantity from dish detail 
                     foreach (var dishDetail in dishesDetail)
                     {
-                        var ingredient = await dbContext.Ingredients.FirstOrDefaultAsync(m => m.IngredientId == dishDetail.IngredientId);
+                        IngredientEntity ingredient;
+                        int? quantity = 0;
 
-                        if (checkMaximumNumber(ingredient.Quantity, dishDetail.Quantity))
+                        if (dish.NeedGarrison == true)
                         {
-                            throw new Exception($"El ingrediente ({ingredient.Ingredient}) del plato ({dish.Dish}) no tiene la disponibilidad requerida");
+                            var ingredientIds = garrisons.Where(m => m.DishId == dish.DishId).Select(m => m.IngredientId);
+                            var ingredients = dbContext.Ingredients.Where(m => ingredientIds.Contains(m.IngredientId));
+
+                            foreach (var g in garrisons)
+                            {
+                                var i = ingredients.FirstOrDefault(m => m.IngredientId == g.IngredientId && m.IsGarrison == true);
+
+                                if (i == null || checkMaximumNumber(i.Quantity, quantity))
+                                {
+                                    throw new Exception($"El ingrediente ({i.Ingredient}) del plato ({dish.Dish}) no tiene la disponibilidad requerida");
+                                }
+                                i.Quantity -= di.Quantity * g.Quantity;
+                                dbContext.Entry(i);
+                            }
+                        }
+                        else
+                        {
+                            ingredient = await dbContext.Ingredients.FirstOrDefaultAsync(m => m.IngredientId == dishDetail.IngredientId);
+                            quantity = dishDetail.Quantity;
+                            if (checkMaximumNumber(ingredient.Quantity, quantity))
+                            {
+                                throw new Exception($"El ingrediente ({ingredient.Ingredient}) del plato ({dish.Dish}) no tiene la disponibilidad requerida");
+                            }
+
+                            ingredient.Quantity -= quantity;
+
+                            dbContext.Entry(ingredient);
                         }
 
-                        ingredient.Quantity -= dishDetail.Quantity;
 
-                        dbContext.Entry(ingredient);
                     }
 
                     result = await dbContext.SaveChangesAsync();

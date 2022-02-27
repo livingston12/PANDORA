@@ -8,7 +8,8 @@ namespace Pandora.Core.Interfaces
     public interface IMenuService : IPandoraService
     {
         Task<Response<MenuViewModel>> GetAsync(MenuRequest filter);
-        Task<Response<CategoryViewModel>> GetCategories(int menuId);
-        Task<Response<DishViewModel>> GetDishes(int categoryId);
+        Task<Response<CategoryViewModel>> GetCategoriesAsync(int menuId);
+        Task<Response<DishViewModel>> GetDishesByCategoryAsync(int categoryId);
+        Task<Response<DishViewModel>> GetDishesByMenusAsync(int menuId);
     }
 }

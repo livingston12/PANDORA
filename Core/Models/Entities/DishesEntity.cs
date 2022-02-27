@@ -20,6 +20,7 @@ namespace Pandora.Core.Models.Entities
         public int Quantity { get; set; }
         public DateTime? ExpirationDate { get; set; }
         public int? CategoryId { get; set; }
+        public bool? NeedGarrison { get; set; } = false;
         [ForeignKey(nameof(CategoryId))]
         public CategoryEntity Category { get; set; }
         public IEnumerable<DishesDetailEntity> Ingredients { get; set; }

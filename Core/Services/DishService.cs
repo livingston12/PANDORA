@@ -91,6 +91,7 @@ namespace Pandora.Services
                     CategoryId = m.CategoryId,
                     Quantity = m.Quantity,
                     Price = m.Price,
+                    NeedGarrison = m.NeedGarrison,
                     Category = m.Category,
                     Ingredients = m.Ingredients
                         .Select(x =>
@@ -162,7 +163,7 @@ namespace Pandora.Services
             var result = await dbContext.Dishes
                 .Where(m => m.Dish == dish)
                 .FirstOrDefaultAsync();
-                
+
             return result;
         }
         private async Task<(DishResult dataResult, string statusCode, string message)> SaveAsync(DishViewModelCreate request, DishResult dishResult)
@@ -209,7 +210,8 @@ namespace Pandora.Services
         private async Task<List<string>> validateDish(DishViewModelCreate request)
         {
             List<string> errors = new List<string>();
-            bool categoryExists = await dbContext.Categories.Where(m => m.CategoryId == request.CategoryId).AnyAsync();
+            bool categoryExist = await dbContext.Categories.Where(m => m.CategoryId == request.CategoryId).AnyAsync();
+            bool ingredientExit = request.Ingredients.Any();
 
             if (request.Dish.Length == 0)
             {
@@ -219,21 +221,25 @@ namespace Pandora.Services
             {
                 errors.Add("El <b>precio</b> tiene que ser mayor que cero");
             }
-            if (!categoryExists)
+            if (!categoryExist)
             {
                 errors.Add("La <b>categoria</b> no existe");
             }
-            if (!request.Ingredients.Any())
+            if (request.NeedGarrison == true && ingredientExit)
             {
-                errors.Add("Los <b>ingredientes</b> son obligatorios");
+                errors.Add("El plato es una guarnicion no debe contener ingredientes");
             }
-            else
+            else if (ingredientExit)
             {
                 var errorDetail = await validateDishDetail(request.Ingredients);
                 if (errorDetail.Any())
                 {
                     errors.AddRange(errorDetail);
                 }
+            }
+            else if (request.Quantity <= 0)
+            {
+                errors.Add("La <b>cantidad</b> es obligatoria");
             }
 
             return errors;
@@ -284,7 +290,8 @@ namespace Pandora.Services
                 Quantity = request.Quantity,
                 Description = request.Description,
                 CategoryId = request.CategoryId,
-                ExpirationDate = request.ExpirationDate
+                ExpirationDate = request.ExpirationDate,
+                NeedGarrison = request.NeedGarrison
             };
             return result;
         }
@@ -365,6 +372,7 @@ namespace Pandora.Services
                     dish.Quantity = request.Quantity;
                     dish.CategoryId = request.CategoryId;
                     dish.Description = request.Description;
+                    dish.NeedGarrison = request.NeedGarrison;
                     dbContext.Entry(dish).State = EntityState.Modified;
                     await dbContext.SaveChangesAsync();
                 }
@@ -389,10 +397,10 @@ namespace Pandora.Services
             {
                 errors.Add("El precio tiene que ser mayor que cero");
             }
-            if (request.Quantity <= 0)
-            {
-                errors.Add("La cantidad tiene que ser mayor que cero");
-            }
+            //if (request.Quantity <= 0)
+            //{
+                //errors.Add("La cantidad tiene que ser mayor que cero");
+            //}
             if (category == null)
             {
                 errors.Add("La categoria no existe");

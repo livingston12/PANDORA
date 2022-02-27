@@ -1,4 +1,3 @@
-
 namespace Pandora.Core.Models.Requests
 {
     public class DishDetailRequest
@@ -7,4 +6,3 @@ namespace Pandora.Core.Models.Requests
         public int? QuantityRequired { get; set; }
     }
 }
-

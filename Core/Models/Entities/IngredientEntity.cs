@@ -16,5 +16,6 @@ namespace Pandora.Core.Models.Entities
         public int? Quantity { get; set; }
         [Required(ErrorMessage = "El restaurante es obligatorio")]
         public int? RestaurantId { get; set; }
+        public bool? IsGarrison { get; set; } = false;
     }
 }

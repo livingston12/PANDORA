@@ -12,14 +12,15 @@ namespace Pandora.Core.Models.Requests
         public string Note { get; set; }
         [Required(ErrorMessage = "El restaurante es obligatorio")]
         public int RestaurantId { get; set; }
-
         public IEnumerable<OrderDetailRequest> OrdersDetail { get; set; }
         public InvoicesRequest Invoice { get; set; }
+        public IEnumerable<GarrisonsRequest> Garrisons { get; set; }
     }
 
     public class OrderDetailRequest
     {
         public int Quantity { get; set; }
         public int DishId { get; set; }
+        public string Note { get; set; }
     }
 }
