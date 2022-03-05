@@ -90,5 +90,17 @@ namespace Pandora.Controllers
             return await IngredientService.PutAsync(ingredient).ConfigureAwait(false);
         }
 
+        [HttpPut("inventory")]
+        //[JwtAuthorize("Hydra.Accounts.Read")]
+        [ProducesResponseType(typeof(UpdateResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<UpdateResult> PutInventoryAsync([FromBody, Required] IngredientUpdateInventory dish)
+        {
+            return await IngredientService.PutInventoryAsync(dish).ConfigureAwait(false);
+        }
+
     }
 }

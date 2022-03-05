@@ -13,4 +13,5 @@ namespace Pandora.Core.ViewModels
         public int? CategoryId { get; set; }
         public bool? NeedGarrison { get; set; } = false;
     }
+
 }

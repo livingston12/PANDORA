@@ -11,6 +11,7 @@ namespace Pandora.Core.Interfaces
     public interface IDishService : IPandoraService
     {
         Task<Response<DishViewModel>> GetAsync(DishRequest filter);
+        Task<Response<DishViewModel>> GetSummaryAsync(int? restaurantId);
         Task<IEnumerable<DishDetailViewModel>> GetDetailAsync(int dishId);
         Task<UpdateResult> PutDetailAsync(DishDetailRequest details);
         Task<UpdateResult> PutAsync(DishUpdateViewModel dish);

@@ -39,6 +39,18 @@ namespace Pandora.Controllers
         {
             return await DishService.GetAsync(request).ConfigureAwait(false);
         }
+
+        [HttpGet("summary/{restaurantId}")]
+        //[JwtAuthorize("Hydra.Accounts.Read")]
+        [ProducesResponseType(typeof(Response<DishViewModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<Response<DishViewModel>> GetSummaryAsync([FromRoute] int? restaurantId)
+        {
+            return await DishService.GetSummaryAsync(restaurantId).ConfigureAwait(false);
+        }
         
         [HttpPost]
         //[JwtAuthorize("Hydra.Accounts.Read")]
