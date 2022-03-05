@@ -17,5 +17,6 @@ namespace Pandora.Core.Models.Entities
         [Required(ErrorMessage = "El restaurante es obligatorio")]
         public int? RestaurantId { get; set; }
         public bool? IsGarrison { get; set; } = false;
+        public bool? IsMisePlace { get; set; } = false;
     }
 }

@@ -89,7 +89,8 @@ namespace Pandora.Services
                     Price = m.Price,
                     Quantity = m.Quantity,
                     RestaurantId = m.RestaurantId,
-                    IsGarrison = m.IsGarrison
+                    IsGarrison = m.IsGarrison,
+                    isMisePlace = m.IsMisePlace
                 });
         }
 
@@ -104,16 +105,7 @@ namespace Pandora.Services
 
             if (total > 0)
             {
-                result = query
-                    .Select(m => new IngredientViewModel()
-                    {
-                        Ingredient = m.Ingredient,
-                        IngredientId = m.IngredientId,
-                        Price = m.Price,
-                        Quantity = m.Quantity,
-                        RestaurantId = m.RestaurantId,
-                        IsGarrison = m.IsGarrison
-                    });
+                result = MapToViewModel(query);
             }
 
             return result;
@@ -130,16 +122,7 @@ namespace Pandora.Services
 
             if (total > 0)
             {
-                result = query
-                    .Select(m => new IngredientViewModel()
-                    {
-                        Ingredient = m.Ingredient,
-                        IngredientId = m.IngredientId,
-                        Price = m.Price,
-                        Quantity = m.Quantity,
-                        RestaurantId = m.RestaurantId,
-                        IsGarrison = m.IsGarrison
-                    });
+                result = MapToViewModel(query);
             }
 
             return result;
@@ -322,6 +305,7 @@ namespace Pandora.Services
                     ingredient.Price = request.Price;
                     ingredient.Quantity = request.Quantity;
                     ingredient.IsGarrison = request.IsGarrison;
+                    ingredient.IsMisePlace = request.isMisePlace;
 
                     dbContext.Entry(ingredient).State = EntityState.Modified;
                     await dbContext.SaveChangesAsync();
@@ -364,6 +348,94 @@ namespace Pandora.Services
 
             results.errors = errors;
             return results;
+        }
+
+        public async Task<UpdateResult> PutInventoryAsync(IngredientUpdateInventory request)
+        {
+            Check.NotNull(request, nameof(request));
+
+            UpdateResult result = new UpdateResult(new Dictionary<string, IEnumerable<string>>());
+            (string Index, List<string> errors) listErrors = ("1", new List<string>());
+
+            var ingredient = await dbContext.Ingredients
+                    .FirstOrDefaultAsync(m =>
+                        m.IngredientId == request.IngredientId
+                        && m.IsMisePlace == true
+                    )
+                    .ConfigureAwait(false);
+
+            if (ingredient == null)
+            {
+                listErrors.errors.Add("El plato no existe");
+            }
+
+            if (listErrors.errors.Any())
+            {
+                result.Errors.Add(listErrors.Index, listErrors.errors);
+                result.StatusCode = "400";
+            }
+            else
+            {
+                try
+                {
+                    int quantity = ingredient.Quantity.HasValue ? ingredient.Quantity.Value : 0;
+                    int currentQuantity = request.Quantity.HasValue ? request.Quantity.Value : 0;
+                    quantity = GetQuantityInventory(request.Type, quantity, currentQuantity);
+
+                    ingredient.Quantity = quantity;
+                    dbContext.Entry(ingredient).State = EntityState.Modified;
+                    await dbContext.SaveChangesAsync();
+                    result.StatusCode = quantity.ToString();
+                }
+                catch (Exception ex)
+                {
+                    listErrors.errors = new List<string>();
+                    listErrors.errors.Add($"Error inesperado: ${ex.Message}");
+                    result.Errors.Add(listErrors.Index, listErrors.errors);
+                    result.StatusCode = "400";
+                }
+            }
+
+            return result;
+        }
+
+        private static int GetQuantityInventory(InventoryType type, int quantity, int currentQuantity)
+        {
+            switch (type)
+            {
+                case InventoryType.increase:
+                case InventoryType.decrease:
+                    currentQuantity = GetQuantityInventory(type, currentQuantity);
+                    quantity += currentQuantity;
+                    break;
+                case InventoryType.current:
+                    currentQuantity = GetQuantityInventory(type, currentQuantity);
+                    quantity = currentQuantity;
+                    break;
+            }
+
+            quantity = quantity > 0 ? quantity : 0;
+            return quantity;
+        }
+
+        private static int GetQuantityInventory(InventoryType type, int currentQuantity)
+        {
+            if (type == InventoryType.increase || type == InventoryType.current)
+            {
+                if (currentQuantity < 0)
+                {
+                    currentQuantity = 0;
+                }
+            }
+            else
+            {
+                if (currentQuantity > 0)
+                {
+                    currentQuantity = 0;
+                }
+            }
+
+            return currentQuantity;
         }
     }
 }

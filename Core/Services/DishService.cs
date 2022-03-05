@@ -102,6 +102,35 @@ namespace Pandora.Services
                 });
         }
 
+        public async Task<Response<DishViewModel>> GetSummaryAsync(int? restaurantId)
+        {
+            Check.NotNull(restaurantId, nameof(restaurantId));
+
+            Response<DishViewModel> result = null;
+            var menuIds = dbContext.Menus.Where(m => m.RestaurantId == restaurantId).Select(m => m.MenuId);
+            var categoryIds = dbContext.Categories.Where(m => menuIds.Contains(m.MenuId)).Select(m => m.CategoryId);
+
+            var query = dbContext
+                            .Dishes
+                            .Include(a => a.Ingredients)
+                            .Where(m => categoryIds.Contains(m.CategoryId.Value))
+                            .AsQueryable();
+            var total = await query.CountAsync().ConfigureAwait(false);
+            if (total > 0)
+            {
+                var queryPaging = MapToViewModel(query);
+                result = new Response<DishViewModel>()
+                {
+                    List = queryPaging,
+                    PageIndex = 1,
+                    PageSize = total,
+                    Total = total
+                };
+            }
+
+            return result;
+        }
+
         public async Task<Result<DishResult>> CreateAsync(DishViewModelCreate request)
         {
             Check.NotNull(request, nameof(request));
@@ -399,7 +428,7 @@ namespace Pandora.Services
             }
             //if (request.Quantity <= 0)
             //{
-                //errors.Add("La cantidad tiene que ser mayor que cero");
+            //errors.Add("La cantidad tiene que ser mayor que cero");
             //}
             if (category == null)
             {
@@ -408,7 +437,7 @@ namespace Pandora.Services
             results.errors = errors;
             return results;
         }
-
+        
         public async Task<UpdateResult> PutDetailAsync(DishDetailRequest request)
         {
             Check.NotNull(request, nameof(request));
@@ -701,6 +730,7 @@ namespace Pandora.Services
 
             return errors;
         }
+
     }
 
 }
